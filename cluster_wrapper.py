@@ -15,7 +15,7 @@ try :
 #os.environ['GIT_PAGER']
 except KeyError:  
     print('BD not found locally')
-    BD = '***'    
+    BD = '/mnt/munin6/Badea/Lab/mouse'    
     #BD ='/Users/ali/Desktop/biac/example'
 else:
     print("BD is found locally.")
@@ -26,9 +26,9 @@ sbatch_folder_path = BD+"/fmri_pipeline/"+job_descrp + '_sbatch/'
 if not os.path.exists(sbatch_folder_path):
     os.system(f"mkdir -p {sbatch_folder_path}" )
     #os.makedirs(sbatch_folder_path)
-GD = '***'
+GD = '/mnt/clustertmp/common/rja20_dev/gunnies/'
 
-list_fmir_folders_path ='***'
+list_fmir_folders_path ='/mnt/munin6/Badea/Lab/mouse/fmri_pipeline/fmri_raw_files/'
 list_fmri_folders = os.listdir(list_fmir_folders_path)
 list_of_subjs_long = [i for i in list_fmri_folders if 'T1' in i]
 
@@ -40,7 +40,7 @@ for subj in list_of_subjs:
     #print(subj)
     #fmri_file = list_fmir_folders_path +subj + "/ses-1/func/" + subj +"_ses-1_bold.nii.gz" 
     #nib.load(fmri_file)
-    python_command = "python ***fmri_prep.py "+subj
+    python_command = "python /mnt/munin6/Badea/Lab/mouse/fmri_pipeline/fmri_prep.py "+subj
     job_name = job_descrp + "_"+ subj
     command = GD + "submit_sge_cluster_job.bash " + sbatch_folder_path + " "+ job_name + " 0 0 '"+ python_command+"'"   
     os.system(command)
