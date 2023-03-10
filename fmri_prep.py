@@ -20,7 +20,7 @@ import pandas as pd
 #subj = 'A22040401' #reads subj number with s... from input of python file 
 subj = sys.argv[1] #reads subj number with s... from input of python file 
 
-mypath= '/mnt/munin6/Badea/Lab/mouse/fmri_pipeline/' # root 
+mypath= '***/fmri_pipeline/' # root 
 input_path = mypath+'/fmri_raw_files/' #add input path + subj + ... to have the path of functional data 
 
 
