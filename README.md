@@ -27,6 +27,7 @@
   This script provides a simple yet effective way to preprocess and enhance MRI image masks, making them suitable for further analysis, such as brain region       segmentation or connectivity studies.
 # fmri_prep.py description: 
 We run fmri_prep.py via cluster_wrapper.py for all subjects.
+
 3.	T1 are masked 
 4.	Masked T1 are re-oriented RAI by c3d
 5.	Using antsRegistration these T1 are registered to T1 of Atlas
