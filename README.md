@@ -25,7 +25,8 @@
   Convert smoothed image data to binary (1 for values above 0 and 0 for values equal to or below 0).
   Save the smoothed binary masks as NIfTI files.
   This script provides a simple yet effective way to preprocess and enhance MRI image masks, making them suitable for further analysis, such as brain region       segmentation or connectivity studies.
-
+# fmri_prep.py description: 
+We run fmri_prep.py via cluster_wrapper.py for all subjects.
 3.	T1 are masked 
 4.	Masked T1 are re-oriented RAI by c3d
 5.	Using antsRegistration these T1 are registered to T1 of Atlas
@@ -53,13 +54,6 @@ i.	These volumes are resampled to have the same voxel dimensions to atlas
 18.	3dDeconvolve does the confound correction using 16 and 17 and (-polort 5 -float  -num_stimts 0).
 19.	3dTproject -polort 0 and -passband 0.01 0.1 does bandpass filtering 
 20.	TS and FC are computed.
-
-
-
-
-
-
-
 
 
 ![image](https://github.com/Ali-Mahzarnia/fMRI_pipeline/assets/69542146/9b859843-8d1e-4178-96a1-8f3e7880abd2)
