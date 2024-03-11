@@ -34,27 +34,37 @@ We run fmri_prep.py via cluster_wrapper.py for all subjects.
 6.	The registration is applied to these T1
 7.	The T1 are resampled to have the same voxel dimensions to atlas
 8.	The raw fmri files are read and separated into 3d images a loop  (every 3  iterations bc of 3 echos while throwing away 4 first images):
-a.	The b0 map is registered to the volumes before applied to them via fugue (--dwell=0.00139)
-b.	The result 3d images are gone through N4BiasFieldCorrection
-c.	For the beginning volume it is registered to T1 masked (of step 4)
-d.	For the rest of volumes, they are registered to the first volume
-e.	For the first volume the registration of 8.c is applied to it
-f.	For the rest of the volumes oth the regsiteration of 8.c and 8.d are applied to it
-g.	The results are re-oriented RAI by c3d
-h.	The registration of 5 is applied to these volumes	
-i.	These volumes are resampled to have the same voxel dimensions to atlas
-9.	These volumes are concatenated after the above loop in 8. ImageMath
-10.	 The results are despiked. 3dDespike
-11.	Slice time correction: slicetimer -r 2.25 –down
-12.	Deterning (skiped) : 3dDetrend -polort 9
-13.	A mask is made based on the Atlas labels
-14.	The results are masked using the results of 13 fslmaths
-15.	3dTstat finds the mean of the fmri
-16.	3dcalc find the scaled fmri c*min(200,a/b*100)*step(a)*step(b) where c is masked a is masked fmri and b is mean from 15.
-17.	Wm and csf masks are made and scaled result of 16 are masked using them separately
-18.	3dDeconvolve does the confound correction using 16 and 17 and (-polort 5 -float  -num_stimts 0).
-19.	3dTproject -polort 0 and -passband 0.01 0.1 does bandpass filtering 
-20.	TS and FC are computed.
+   
+  a.	The b0 map is registered to the volumes before applied to them via fugue (--dwell=0.00139)
+
+  b.	The result 3d images are gone through N4BiasFieldCorrection
+  
+  c.	For the beginning volume it is registered to T1 masked (of step 4)
+  
+  d.	For the rest of volumes, they are registered to the first volume
+  
+  e.	For the first volume the registration of 8.c is applied to it
+
+  f.	For the rest of the volumes oth the regsiteration of 8.c and 8.d are applied to it
+
+  g.	The results are re-oriented RAI by c3d
+
+  h.	The registration of 5 is applied to these volumes	
+
+  i.	These volumes are resampled to have the same voxel dimensions to atlas
+
+10.	These volumes are concatenated after the above loop in 8. ImageMath
+11.	 The results are despiked. 3dDespike
+12.	Slice time correction: slicetimer -r 2.25 –down
+13.	Deterning (skiped) : 3dDetrend -polort 9
+14.	A mask is made based on the Atlas labels
+15.	The results are masked using the results of 13 fslmaths
+16.	3dTstat finds the mean of the fmri
+17.	3dcalc find the scaled fmri c*min(200,a/b*100)*step(a)*step(b) where c is masked a is masked fmri and b is mean from 15.
+18.	Wm and csf masks are made and scaled result of 16 are masked using them separately
+19.	3dDeconvolve does the confound correction using 16 and 17 and (-polort 5 -float  -num_stimts 0).
+20.	3dTproject -polort 0 and -passband 0.01 0.1 does bandpass filtering 
+21.	TS and FC are computed.
 
 
 ![image](https://github.com/Ali-Mahzarnia/fMRI_pipeline/assets/69542146/9b859843-8d1e-4178-96a1-8f3e7880abd2)
