@@ -39,7 +39,16 @@ print("Number of Devices : {}".format(strategy.num_replicas_in_sync))
 
 # Custom Loss and Accuracy functions ----------------------------------------------------------------
 # Dice coefficients are calculated again separately after training and testing
+def intensity_normalizer(image):
 
+    img_normalized = np.copy(image)
+
+
+
+    img_tmp_norm = (img_normalized-np.mean(img_normalized))/np.std(img_normalized)
+
+
+    return img_tmp_norm
 
 def dice_metric(y_true, y_pred):
 
@@ -146,7 +155,7 @@ def RARE_mask_pred(image_dir, output_dir):
 
 
     imglist_temp = os.listdir(image_dir)
-    imglist=[s for s in imglist_temp if "T1" in s]
+    imglist=[s for s in imglist_temp if "T2" in s]
 
     for img_num in range(0,len(imglist)):
 
@@ -154,6 +163,7 @@ def RARE_mask_pred(image_dir, output_dir):
 
         image = nib.load(image_dir + '/'+ img_name)
         data_img = image.get_fdata()
+        data_img = intensity_normalizer(data_img)
         affine_RARE = image.affine  
 
     ################## if unc data then flip image as follows: #######################
@@ -182,10 +192,10 @@ def RARE_mask_pred(image_dir, output_dir):
 
             test_img = np.reshape(test_img_rot, [200,180,100,1])
 
+            print('1')
 
 
-
-            model_path = '/Users/ali/Desktop/Feb23/fmri_pipeline/model_2d_contrast_full_2.h5'
+            model_path = '/Users/ali/Desktop/Mar24/fmri_masking_T2/model_2d_contrast_full_2.h5'
 
 
             with strategy.scope():
