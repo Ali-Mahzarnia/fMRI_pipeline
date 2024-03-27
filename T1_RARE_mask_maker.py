@@ -150,93 +150,99 @@ def cnn(fliter_num, kernel_size, kfold, nth_fold, trial_str):
 
 ##
 
+old_created_folder = '/Volumes/Data/Badea/Lab/mouse/fMRI_data_packages_for_Nariman/T1_mask_before_bin/' # not duplicate the effort for T1
+##
+
 
 def RARE_mask_pred(image_dir, output_dir):
 
 
     imglist_temp = os.listdir(image_dir)
-    imglist=[s for s in imglist_temp if "T2" in s]
+    imglist=[s for s in imglist_temp if "T1.nii.gz" in s] # res_reor_ for T2
+
+
 
     for img_num in range(0,len(imglist)):
+        if not os.path.isfile(old_created_folder + "pred_mask_" + imglist[img_num]):
 
-        img_name = imglist[img_num]
-
-        image = nib.load(image_dir + '/'+ img_name)
-        data_img = image.get_fdata()
-        data_img = intensity_normalizer(data_img)
-        affine_RARE = image.affine  
-
-    ################## if unc data then flip image as follows: #######################
-
-    #    data_img = np.rot90(data_img,2)
-    #    data_img = np.flip(data_img,1)
-    #    data_img = np.flip(data_img,2)
-
-
-
-
-
-        print(np.shape(data_img))
-
-        if (np.size(data_img,0) == 180 and np.size(data_img,1) == 200):
-
-            data_clipped = intensity_normalizer(data_img)
-            data_norm = intensity_normalizer(data_clipped)
-            #data_norm = np.copy(data_img)
-
-            #est_num, train_num = train_test_index(kfold, nth_fold, data_norm)
-
-
-            test_img_rot = np.rot90(data_norm,axes=(0,1))
-            print(np.shape(test_img_rot))
-
-            test_img = np.reshape(test_img_rot, [200,180,100,1])
-
-            print('1')
-
-
-            model_path = '/Users/ali/Desktop/Mar24/fmri_masking_T2/model_2d_contrast_full_2.h5'
-
-
-            with strategy.scope():
-                my_metrics = [
-                    dice_metric,
-              #      tf.keras.metrics.Precision(thresholds=classification_threshold,
-              #                               name='precision'
-              #                               ),
-              #      tf.keras.metrics.Recall(thresholds=classification_threshold,
-              #                            name="recall"),
-              #      tf.keras.metrics.AUC(name='auc')
-                ]
-                model = tf.keras.models.load_model(
-                    model_path, custom_objects={'loss': 'binary_crossentropy', 'dice_metric': dice_metric, 'my_metrics': my_metrics}, compile=True, options=None
-                )
-
-
-
-            #np.save('/home/alex/Stroke_multi/results/history_3d_fold_' + str(nth_fold) + '_trial1_1.npy',history.history)
-            #model.save('/home/alex/Stroke_multi/results/model_3d_fold_' + str(nth_fold) + '_trial1_1.h5')
-
-            #nif_test = nib.Nifti1Image(y_val, affine=np.eye(4))
-            #nib.save(nif_test, '/home/alex/Stroke_multi/results/mask_test_3d_fold_' + str(nth_fold) + '_trial1_1.nii')
-                pred_pre = np.empty([200,180,100,1])
-                for i in range(0,200):
-                    pred_slice = np.reshape(test_img[i,:,:,:], [1,180,100,1])
-                    pred_pre[i,:,:,:] = model.predict(pred_slice)
-
-
-                pred_full_rot = np.rot90(pred_pre,axes=(1,0))
-                pred = pred_full_rot[:,:,:,0]
-                
-
-                nif_img = nib.Nifti1Image(pred, affine=affine_RARE)
-                #nif_img_raw = nib.Nifti1Image(pred_full, affine=affine_RARE)
-                #nif_test_img = nib.Nifti1Image(test_img_rot, affine=affine_RARE)
-                nib.save(nif_img, output_dir + '/pred_mask_' + img_name)
-                #nib.save(nif_img_raw, '/home/alex/hsm/Invivo/RARE/pred/sub-22040410_ses-1_T1w_pred_mask_raw.nii')
-                #nib.save(nif_test_img, '/home/alex/hsm/Invivo/RARE/pred/sub-22040410_ses-1_T1w_test_img.nii')
-                print('Prediction Finished.')
-                print(np.shape(pred))
+            img_name = imglist[img_num]
+    
+            image = nib.load(image_dir + '/'+ img_name)
+            data_img = image.get_fdata()
+            data_img = intensity_normalizer(data_img)
+            affine_RARE = image.affine  
+    
+        ################## if unc data then flip image as follows: #######################
+    
+        #    data_img = np.rot90(data_img,2)
+        #    data_img = np.flip(data_img,1)
+        #    data_img = np.flip(data_img,2)
+    
+    
+    
+    
+    
+            print(np.shape(data_img))
+    
+            if (np.size(data_img,0) == 180 and np.size(data_img,1) == 200):
+    
+                data_clipped = intensity_normalizer(data_img)
+                data_norm = intensity_normalizer(data_clipped)
+                #data_norm = np.copy(data_img)
+    
+                #est_num, train_num = train_test_index(kfold, nth_fold, data_norm)
+    
+    
+                test_img_rot = np.rot90(data_norm,axes=(0,1))
+                print(np.shape(test_img_rot))
+    
+                test_img = np.reshape(test_img_rot, [200,180,100,1])
+    
+                print('1')
+    
+    
+                model_path = '/Users/ali/Desktop/Mar24/fmri_masking_T2/model_2d_contrast_full_2.h5'
+    
+    
+                with strategy.scope():
+                    my_metrics = [
+                        dice_metric,
+                  #      tf.keras.metrics.Precision(thresholds=classification_threshold,
+                  #                               name='precision'
+                  #                               ),
+                  #      tf.keras.metrics.Recall(thresholds=classification_threshold,
+                  #                            name="recall"),
+                  #      tf.keras.metrics.AUC(name='auc')
+                    ]
+                    model = tf.keras.models.load_model(
+                        model_path, custom_objects={'loss': 'binary_crossentropy', 'dice_metric': dice_metric, 'my_metrics': my_metrics}, compile=True, options=None
+                    )
+    
+    
+    
+                #np.save('/home/alex/Stroke_multi/results/history_3d_fold_' + str(nth_fold) + '_trial1_1.npy',history.history)
+                #model.save('/home/alex/Stroke_multi/results/model_3d_fold_' + str(nth_fold) + '_trial1_1.h5')
+    
+                #nif_test = nib.Nifti1Image(y_val, affine=np.eye(4))
+                #nib.save(nif_test, '/home/alex/Stroke_multi/results/mask_test_3d_fold_' + str(nth_fold) + '_trial1_1.nii')
+                    pred_pre = np.empty([200,180,100,1])
+                    for i in range(0,200):
+                        pred_slice = np.reshape(test_img[i,:,:,:], [1,180,100,1])
+                        pred_pre[i,:,:,:] = model.predict(pred_slice)
+    
+    
+                    pred_full_rot = np.rot90(pred_pre,axes=(1,0))
+                    pred = pred_full_rot[:,:,:,0]
+                    
+    
+                    nif_img = nib.Nifti1Image(pred, affine=affine_RARE)
+                    #nif_img_raw = nib.Nifti1Image(pred_full, affine=affine_RARE)
+                    #nif_test_img = nib.Nifti1Image(test_img_rot, affine=affine_RARE)
+                    nib.save(nif_img, output_dir + '/pred_mask_' + img_name)
+                    #nib.save(nif_img_raw, '/home/alex/hsm/Invivo/RARE/pred/sub-22040410_ses-1_T1w_pred_mask_raw.nii')
+                    #nib.save(nif_test_img, '/home/alex/hsm/Invivo/RARE/pred/sub-22040410_ses-1_T1w_test_img.nii')
+                    print('Prediction Finished.')
+                    print(np.shape(pred))
 
 
 
