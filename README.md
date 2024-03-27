@@ -25,6 +25,10 @@
   Convert smoothed image data to binary (1 for values above 0 and 0 for values equal to or below 0).
   Save the smoothed binary masks as NIfTI files.
   This script provides a simple yet effective way to preprocess and enhance MRI image masks, making them suitable for further analysis, such as brain region       segmentation or connectivity studies.
+  
+# if subjects have T2 instead of T1:
+  The appropriate binarizer should be used based on the name of the code file (binarizerT1.py vs. binarizerT2.py). In addition if subject has T2 we need more       rotation using a)T2_reorient_for_DL_masking.py b)deep learning mask maker c)binarizerT2.py d)reorient_T2masks_toT2.py respectively. 
+
 # fmri_prep.py description: 
 We run fmri_prep.py via cluster_wrapper.py for all subjects.
 
