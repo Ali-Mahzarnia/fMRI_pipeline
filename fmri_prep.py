@@ -17,11 +17,15 @@ import pandas as pd
 
 
 
-#subj = 'A22040401' #reads subj number with s... from input of python file 
+#subj = 'A22030711' #reads subj number with s... from input of python file 
 subj = sys.argv[1] #reads subj number with s... from input of python file 
 
-mypath= '/mnt/munin2/Badea/Lab/mouse/fmri_pipeline/' # root 
-input_path = mypath+'/fmri_raw_files/' #add input path + subj + ... to have the path of functional data 
+mypath = '/mnt/munin2/Badea/Lab/mouse/Nariman_fmri_pipeline/' # root 
+#mypath = '/Volumes/Data/Badea/Lab/mouse/Nariman_fmri_pipeline/' # root 
+
+input_path = '/mnt/munin2/Badea/Lab//mouse/fMRI_data_packages_for_Nariman/' #add input path + subj + ... to have the path of functional data 
+#input_path = '/Volumes/Data/Badea/Lab/mouse/fMRI_data_packages_for_Nariman/' #add input path + subj + ... to have the path of functional data 
+
 
 
 #add input path + subj + ... to have the path of functional data 
@@ -30,7 +34,9 @@ bold=nib.load(fmri_file_path) # read the data of this functional file as nib obj
 bold_data=bold.get_fdata() #read data as array 
 
 #start masking T1 rare
+T2_indic = False
 T1_file_path=input_path + subj + '_T1.nii.gz' # path of T1
+if not os.path.isfile(T1_file_path) : T1_file_path = input_path + subj + '_T2.nii.gz' ; T2_indic = True;
 T1=nib.load(T1_file_path) # read the data of this anatomical file as nib object
 T1_data=T1.get_fdata()#read data as array 
 
@@ -59,17 +65,16 @@ T1_atlas_reg_dir = mypath+'T1_atlas_reg/' # make directory for T1 masked
 if not os.path.isdir(T1_atlas_reg_dir) : os.mkdir(T1_atlas_reg_dir)
 
 out_T1_atlas_reg = T1_atlas_reg_dir +subj +"_" 
-Atlas_T1_path = mypath+'/chass_symmetric3/chass_symmetric3_T1_PLI_0p1.nii.gz'
+Atlas_T1_path = mypath+'/chass_symmetric3/chass_symmetric3_T1_PLI.nii.gz'
 
 #reorient T1 call it out_T1_atlas_reg+"RAI.nii.gz"
-os.system("c3d "+T1_masked_path+" -orient RAI -o "+out_T1_atlas_reg+"RAI.nii.gz")
+if T2_indic==False: os.system("c3d "+T1_masked_path+" -orient RAI -o "+out_T1_atlas_reg+"RAI.nii.gz")
+if T2_indic==True: os.system("c3d "+T1_masked_path+" -orient RIP -o "+out_T1_atlas_reg+"RAI.nii.gz")
 #register reoiriented T1 to Atlas T1/ diffusion  results are in out_T1_atlas_reg/0Generic...mat
 os.system("antsRegistration -v 1 -d 3 -m Mattes["+Atlas_T1_path+" ,"+out_T1_atlas_reg+"RAI.nii.gz,1,32,None] -r ["+Atlas_T1_path+" ,"+out_T1_atlas_reg+"RAI.nii.gz,1] -t affine[0.1] -c [300x300x0x0,1e-8,20] -s 4x2x1x0.5vox -f 6x4x2x1 -u 1 -z 1 -l 1 -o "+out_T1_atlas_reg+ " >/dev/null 2>&1")  
 #appply previous transform and resample to T1 original
-#os.system("antsApplyTransforms -d 3 -e 0 --float  -u float -i "+out_T1_atlas_reg+"RAI.nii.gz -r "+Atlas_T1_path+" -o "+out_T1_atlas_reg+"regs.nii.gz -t "+out_T1_atlas_reg+"0GenericAffine.mat"+ " >/dev/null 2>&1") 
-#os.system("ResampleImageBySpacing  3 " +out_T1_atlas_reg+"regs.nii.gz " +out_T1_atlas_reg+"regs.nii.gz 0.1 0.1 0.1 0 0 0 >/dev/null 2>&1") 
-
 os.system("antsApplyTransforms -d 3 -e 0 --float  -u float -i "+out_T1_atlas_reg+"RAI.nii.gz -r "+Atlas_T1_path+" -o "+out_T1_atlas_reg+"regs.nii.gz -t "+out_T1_atlas_reg+"0GenericAffine.mat"+ " >/dev/null 2>&1") 
+os.system("ResampleImageBySpacing  3 " +out_T1_atlas_reg+"regs.nii.gz " +out_T1_atlas_reg+"regs.nii.gz 0.1 0.1 0.1 0 0 0 >/dev/null 2>&1") 
 #new register T1_rare to atlas PLI after reorienting to RAI as well as resampling
 
 
@@ -79,7 +84,7 @@ os.system("antsApplyTransforms -d 3 -e 0 --float  -u float -i "+out_T1_atlas_reg
 vol_dir = mypath + 'vol_atlas_reg/'
 if not os.path.isdir(vol_dir) : os.mkdir(vol_dir)
 out_vol_atlas_reg = vol_dir + subj+'_'
-Atlas_T1_path = mypath+'chass_symmetric3/chass_symmetric3_T1_PLI_0p3.nii.gz'
+Atlas_T1_path = mypath+'chass_symmetric3/chass_symmetric3_T1_PLI.nii.gz'
 ##
 
 #new path of b0 field map and its output for cropping before use after making a b0_after folder
@@ -151,13 +156,13 @@ for i in range(begin_volume,int(bold_data.shape[3]/3)):
 
     #if outnib output instead of outnib masked the fmri are unmasked, next line
     #os.system("c3d "+out_nib_masked+" -orient RAI -o "+out_vol_atlas_reg_ith+"regs.nii.gz")
-    os.system("c3d "+outnib+" -orient RAI -o "+out_vol_atlas_reg_ith+"regs.nii.gz")
+    if T2_indic==False: os.system("c3d "+outnib+" -orient RAI -o "+out_vol_atlas_reg_ith+"regs.nii.gz")
+    if T2_indic==True: os.system("c3d "+outnib+" -orient RIP -o "+out_vol_atlas_reg_ith+"regs.nii.gz")
+
   #  os.system("/Applications/ANTS/antsRegistration -v 1 -d 3 -m Mattes["+Atlas_T1_path+" ,"+out_vol_atlas_reg_ith+"RAI.nii.gz,1,32,None] -r ["+Atlas_T1_path+" ,"+out_vol_atlas_reg_ith+"RAI.nii.gz,1] -t affine[0.1] -c [300x300x0x0,1e-8,20] -s 4x2x1x0.5vox -f 6x4x2x1 -u 1 -z 1 -l 1 -o "+out_vol_atlas_reg_ith+" >/dev/null 2>&1")  
-  
-  #  os.system("antsApplyTransforms -d 3 -e 0 --float  -u float -i "+out_vol_atlas_reg_ith+"regs.nii.gz -r "+Atlas_T1_path+" -o "+out_vol_atlas_reg_ith+"regs.nii.gz -t "+out_T1_atlas_reg+"0GenericAffine.mat"+ ">/dev/null 2>&1") 
-  #  os.system("ResampleImageBySpacing  3 " +out_vol_atlas_reg_ith+"regs.nii.gz " +out_vol_atlas_reg_ith+"regs.nii.gz 0.3 0.3 0.3 0 0 0 >/dev/null 2>&1") 
- 
     os.system("antsApplyTransforms -d 3 -e 0 --float  -u float -i "+out_vol_atlas_reg_ith+"regs.nii.gz -r "+Atlas_T1_path+" -o "+out_vol_atlas_reg_ith+"regs.nii.gz -t "+out_T1_atlas_reg+"0GenericAffine.mat"+ ">/dev/null 2>&1") 
+    os.system("ResampleImageBySpacing  3 " +out_vol_atlas_reg_ith+"regs.nii.gz " +out_vol_atlas_reg_ith+"regs.nii.gz 0.3 0.3 0.3 0 0 0 >/dev/null 2>&1") 
+ 
 
 
   
@@ -296,6 +301,8 @@ label_nii.shape
 data_label=label_nii.get_fdata()
 roi_list=np.unique(data_label)
 roi_list = roi_list[1:]
+
+
 #atlas_idx = data_label
 
 time_ser_path= mypath + 'time_ser/'
